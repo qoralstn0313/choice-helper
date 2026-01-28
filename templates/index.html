@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Choice Helper</title>
+</head>
+<body>
+  <h1>결정 도와주는 서비스</h1>
+
+  <label>질문</label><br>
+  <input id="q" placeholder="예: 오늘 뭐 먹지?" style="width: 320px;"><br><br>
+
+  <h3>프리셋</h3>
+  <button type="button" onclick="applyPreset('lunch')">점심</button>
+  <button type="button" onclick="applyPreset('dinner')">저녁</button>
+  <button type="button" onclick="applyPreset('late')">야식</button>
+  <button type="button" onclick="applyPreset('solo')">혼밥</button>
+  <button type="button" onclick="applyPreset('date')">데이트</button>
+  <button type="button" onclick="applyPreset('study')">공부/집중</button>
+  <button type="button" onclick="clearOptions()">비우기</button>
+  <br><br>
+
+  <label>선택지 (최대 5개)</label><br>
+  <input class="opt" placeholder="선택지 1" style="width: 320px;"><br>
+  <input class="opt" placeholder="선택지 2" style="width: 320px;"><br>
+  <input class="opt" placeholder="선택지 3" style="width: 320px;"><br>
+  <input class="opt" placeholder="선택지 4" style="width: 320px;"><br>
+  <input class="opt" placeholder="선택지 5" style="width: 320px;"><br><br>
+
+  <button id="btn">결정해줘</button>
+
+  <pre id="out" style="margin-top: 16px; background:#f6f6f6; padding:12px;"></pre>
+
+  <script>
+    const PRESETS = {
+      lunch: ["국밥", "제육", "김밥/분식", "돈까스", "샐러드"],
+      dinner: ["치킨", "피자", "삼겹살", "초밥", "파스타"],
+      late: ["라면", "족발/보쌈", "떡볶이", "편의점", "버거"],
+      solo: ["국밥", "라멘", "김밥", "덮밥", "샌드위치"],
+      date: ["파스타", "스테이크", "초밥", "브런치", "디저트카페"],
+      study: ["알고리즘 1문제", "Flask API 1개", "문서 정리 20분", "유튜브 1개만", "휴식 10분"]
+    };
+  
+    function setOptionInputs(values) {
+      const inputs = [...document.querySelectorAll(".opt")];
+      inputs.forEach((el, idx) => {
+        el.value = values[idx] ?? "";
+      });
+    }
+  
+    function applyPreset(key) {
+      const values = PRESETS[key] || [];
+      setOptionInputs(values);
+    }
+  
+    function clearOptions() {
+      setOptionInputs([]);
+    }
+  
+    document.getElementById("btn").addEventListener("click", async () => {
+      const question = document.getElementById("q").value;
+      const options = [...document.querySelectorAll(".opt")]
+        .map(el => el.value.trim())
+        .filter(Boolean);
+  
+      const res = await fetch("/decide", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ question, options })
+      });
+  
+      const data = await res.json();
+      document.getElementById("out").textContent = JSON.stringify(data, null, 2);
+    });
+  </script>
+  
+</body>
+</html>
